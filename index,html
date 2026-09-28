@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading & Vocabulary Practice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        /* Matn va so'zlar uslubi */
+        .reading-text {
+            font-size: 18px;
+            position: relative;
+            background: #fafafa;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+
+        /* Interaktiv so'zlar */
+        .word {
+            text-decoration: underline dotted #3498db;
+            color: #2980b9;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            padding: 0 2px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .word:hover, .word:active {
+            background-color: #e8f4fc;
+        }
+
+        /* So'z tepasidagi tarjima oynachasi (Tooltip) */
+        .tooltip-popover {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 100;
+        }
+
+        /* Tooltip ko'rsatgichi (strelka) */
+        .tooltip-popover::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+
+        .word.active .tooltip-popover {
+            display: block;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, 5px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Tugmalar va Forma */
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-teacher {
+            background-color: #e74c3c;
+            margin-top: 20px;
+        }
+
+        .btn-teacher:hover {
+            background-color: #c0392b;
+        }
+
+        /* Teacher Dashboard Panel */
+        #teacher-panel {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff0f0;
+            border: 2px dashed #e74c3c;
+            border-radius: 8px;
+        }
+
+        .student-result {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📖 Reading Practice</h1>
+    <p><i>Ahamiyatli so'z ustiga bosing — tarjimasi aynan o'sha so'zning tepasida chiqadi.</i></p>
+
+    <!-- Reading matni -->
+    <div class="reading-text">
+        Today, learning 
+        <span class="word" onclick="toggleTranslation(this)">
+            languages
+            <span class="tooltip-popover">Tillar</span>
+        </span> 
+        opens up many 
+        <span class="word" onclick="toggleTranslation(this)">
+            opportunities
+            <span class="tooltip-popover">Imkoniyatlar</span>
+        </span>. 
+        Consistent 
+        <span class="word" onclick="toggleTranslation(this)">
+            practice
+            <span class="tooltip-popover">Amaliyot / Mashq</span>
+        </span> 
+        is the key to success.
+    </div>
+
+    <!-- O'quvchi topshiriq topshirish qismi -->
+    <h2>Topshiriqni topshirish</h2>
+    <form id="submission-form" onsubmit="submitTask(event)">
+        <label for="student-name">Ism-familiyangiz:</label><br>
+        <input type="text" id="student-name" required style="width: 100%; padding: 8px; margin: 8px 0 15px; box-sizing: border-box;"><br>
+        
+        <label for="student-answer">Javobingiz (Qisqacha mazmun):</label><br>
+        <textarea id="student-answer" rows="4" required style="width: 100%; padding: 8px; margin: 8px 0 15px; box-sizing: border-box;"></textarea><br>
+
+        <button type="submit" class="btn">Yuborish</button>
+    </form>
+
+    <hr style="margin-top: 40px;">
+
+    <!-- O'qituvchi tugmasi va yopiq paneli -->
+    <button class="btn btn-teacher" onclick="openTeacherDashboard()">🔒 Teacher Dashboard (O'qituvchi uchun)</button>
+
+    <div id="teacher-panel">
+        <h2>📊 O'quvchilar javoblari</h2>
+        <div id="results-list">
+            <p>Hozircha hech kim topshiriq yubormadi.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. So'z ustiga bosganda tarjimani (Tooltip) chiqarish
+    function toggleTranslation(element) {
+        // Boshqa ochik turgan tarjimalarni yopish
+        const allWords = document.querySelectorAll('.word');
+        allWords.forEach(w => {
+            if (w !== element) w.classList.remove('active');
+        });
+
+        // Bosilgan so'znikini yoqish/o'chirish
+        element.classList.toggle('active');
+    }
+
+    // Boshqa bo'sh joyga bosganda tarjima oynachasini yopish
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('word')) {
+            document.querySelectorAll('.word').forEach(w => w.classList.remove('active'));
+        }
+    });
+
+    // 2. Topshiriqni saqlash (Simulyatsiya)
+    function submitTask(e) {
+        e.preventDefault();
+        const name = document.getElementById('student-name').value;
+        const answer = document.getElementById('student-answer').value;
+
+        let results = JSON.parse(localStorage.getItem('studentResults') || '[]');
+        results.push({ name: name, answer: answer, date: new Date().toLocaleTimeString() });
+        localStorage.setItem('studentResults', JSON.stringify(results));
+
+        alert('Javobingiz muvaffaqiyatli yuborildi!');
+        document.getElementById('submission-form').reset();
+    }
+
+    // 3. Teacher Dashboard'ni Parol bilan ochish
+    function openTeacherDashboard() {
+        const password = prompt("O'qituvchi parolini kiriting:");
+        
+        // PAROL: 1234 (Xohlasangiz buni o'zgartirishingiz mumkin)
+        if (password === "1234") {
+            const panel = document.getElementById('teacher-panel');
+            panel.style.display = 'block';
+            loadResults();
+            alert("Xush kelibsiz, ustoz!");
+        } else if (password !== null) {
+            alert("Xato parol! Kirish taqiqlandi.");
+        }
+    }
+
+    // Natijalarni ko'rsatish
+    function loadResults() {
+        const resultsList = document.getElementById('results-list');
+        const results = JSON.parse(localStorage.getItem('studentResults') || '[]');
+
+        if (results.length === 0) {
+            resultsList.innerHTML = "<p>Hozircha hech kim topshiriq yubormadi.</p>";
+            return;
+        }
+
+        resultsList.innerHTML = "";
+        results.forEach((item, index) => {
+            resultsList.innerHTML += `
+                <div class="student-result">
+                    <strong>${index + 1}. ${item.name}</strong> (${item.date}):<br>
+                    <em>"${item.answer}"</em>
+                </div>
+            `;
+        });
+    }
+</script>
+
+</body>
+</html>
